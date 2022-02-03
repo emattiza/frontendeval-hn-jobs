@@ -1,29 +1,52 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Html, div, img)
-import Html.Attributes exposing (src, style)
+import Html exposing (Html, article, button, div, h1, text)
+import Html.Attributes exposing (class)
 import Html.Events exposing (..)
 import Msg exposing (Msg(..))
 
 
-main : Program () Int Msg
+type alias Job =
+    { id : Int
+    , by : String
+    , score : Int
+    , time : Int
+    , title : String
+    , postType : String
+    , url : String
+    }
+
+
+type alias Model =
+    { jobs : List Job
+    }
+
+
+initialModel : Model
+initialModel =
+    Model [ Job 1 "Me" 1 1 "Hello, jobs!" "job" "https://mattiza.dev" ]
+
+
+main : Program () Model Msg
 main =
-    Browser.sandbox { init = 0, update = update, view = view }
+    Browser.sandbox { init = initialModel, update = update, view = view }
 
 
-update : Msg -> number -> number
+update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Increment ->
-            model + 1
+        _ -> model
 
-        Decrement ->
-            model - 1
-
-
-view : Int -> Html Msg
+view : Model -> Html Msg
 view model =
     div []
-        [ img [ src "/logo.png", style "width" "300px" ] []
+        [ h1 [] [ text "HN Jobs" ]
+        , div [ class "container" ] (List.map viewJobCard model.jobs)
+        , button [ class "btn" ] [ text "Load More..." ]
         ]
+
+
+viewJobCard : Job -> Html Msg
+viewJobCard job =
+    article [ class "job-article" ] [ text <| "Id: " ++ String.fromInt job.id ]
