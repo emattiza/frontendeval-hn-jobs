@@ -25,7 +25,14 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    Model [ Job 1 "Me" 1 1 "Hello, jobs!" "job" "https://mattiza.dev" ]
+    Model
+        [ Job 1 "Me" 1 1 "Hello, jobs!" "job" "https://mattiza.dev"
+        , Job 2 "Me" 1 1 "Hello, jobs!" "job" "https://mattiza.dev"
+        , Job 3 "Me" 1 1 "Hello, jobs!" "job" "https://mattiza.dev"
+        , Job 4 "Me" 1 1 "Hello, jobs!" "job" "https://mattiza.dev"
+        , Job 5 "Me" 1 1 "Hello, jobs!" "job" "https://mattiza.dev"
+        , Job 6 "Me" 1 1 "Hello, jobs!" "job" "https://mattiza.dev"
+        ]
 
 
 main : Program () Model Msg
@@ -36,17 +43,20 @@ main =
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        _ -> model
+        _ ->
+            model
+
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h1 [] [ text "HN Jobs" ]
-        , div [ class "container" ] (List.map viewJobCard model.jobs)
-        , button [ class "btn" ] [ text "Load More..." ]
+    div [ class "app-container" ]
+        [ h1 [ class "job-header-text" ] [ text "HN Jobs" ]
+        , div [ class "divide" ] []
+        , div [ class "jobs-container" ] (List.map viewJobCard model.jobs)
+        , div [ class "btn-container" ] [ button [ class "load-more-jobs-btn" ] [ text "Load More..." ] ]
         ]
 
 
 viewJobCard : Job -> Html Msg
 viewJobCard job =
-    article [ class "job-article" ] [ text <| "Id: " ++ String.fromInt job.id ]
+    div [ class "job-article" ] [ text <| "Id: " ++ String.fromInt job.id ]
