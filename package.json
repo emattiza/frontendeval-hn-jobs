@@ -5,12 +5,10 @@
   "version": "1.1.0",
   "license": "MIT",
   "scripts": {
-    "postinstall": "elm-tooling install",
     "dev": "vite",
-    "prebuild": "elm-tooling install",
     "build": "vite build",
     "serve": "vite preview",
-    "test": "elm-test-rs"
+    "test": "elm-test"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.2",

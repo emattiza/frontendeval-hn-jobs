@@ -29,8 +29,22 @@ body {
 }
 
 .job-article {
-    @apply col-span-1 card text-center card-bordered rounded-md
+    @apply col-span-1 card text-center card-bordered rounded-md shadow-lg
 }
 .load-more-jobs-btn {
-    @apply btn btn-primary text-center place-content-center content-center self-center
+    @apply btn btn-ghost text-center place-content-center content-center self-center
+}
+
+.job-body {
+  @apply card-body
+}
+
+.job-details {
+  @apply align-middle
+}
+.job-company {
+  @apply align-top
+}
+.job-date {
+  @apply align-bottom
 }
