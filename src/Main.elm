@@ -1,30 +1,33 @@
 module Main exposing (main)
 
+import Array exposing (Array)
 import Browser
 import Html exposing (Html, button, div, h1, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (..)
 import Job exposing (Job)
 import JobFeed exposing (JobFeed)
-import Msg exposing (Msg(..), getCurrentJobFeed)
+import Msg exposing (Msg(..), getCurrentJobFeed, getFirstJobs, getMoreJobs)
 import RemoteData exposing (RemoteData(..), WebData)
-
+import Task
 
 
 type alias Model =
-    { jobs : List Job
-    , currentJob : WebData Job
+    { jobs : Array Job
     , jobFeed : WebData JobFeed
+    , firstJobs : WebData (List Job)
+    , nextJobs : WebData (List Job)
     }
 
 
 init : flags -> ( Model, Cmd Msg )
 init _ =
-    ( { jobs = []
+    ( { jobs = Array.empty
       , jobFeed = Loading
-      , currentJob = NotAsked
+      , firstJobs = NotAsked
+      , nextJobs = NotAsked
       }
-    , getCurrentJobFeed
+    , Task.attempt (\result -> LoadFeed (RemoteData.fromResult result)) getCurrentJobFeed
     )
 
 
@@ -38,21 +41,42 @@ main =
         }
 
 
-
-
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         LoadMoreJobs ->
-            ( model, Cmd.none )
+            let
+                start =
+                    Array.length model.jobs - 1
 
-        GotJobsFeed feed ->
-            ( { model | jobFeed = feed }, Cmd.none )
+                end =
+                    start + 6
+            in
+            ( model, Task.perform GotMoreJobs (getMoreJobs model.jobFeed start end) )
 
-        GotJob job ->
-            ( { model | currentJob = job }, Cmd.none )
+        LoadFeed feed ->
+            case feed of
+                Success newFeed ->
+                    ( { model | jobFeed = feed, firstJobs = Loading }, Task.attempt (\result -> GotFirstJobs <| RemoteData.fromResult result) (getFirstJobs newFeed) )
+
+                _ ->
+                    ( { model | jobFeed = feed }, Cmd.none )
+
+        GotFirstJobs newJobs ->
+            case newJobs of
+                Success gotJobs ->
+                    ( { model | firstJobs = newJobs, jobs = Array.fromList gotJobs }, Cmd.none )
+
+                _ ->
+                    ( { model | firstJobs = newJobs }, Cmd.none )
+
+        GotMoreJobs moreJobs ->
+            case moreJobs of
+                Success gotJobs ->
+                    ( { model | nextJobs = moreJobs, jobs = Array.append model.jobs (Array.fromList gotJobs) }, Cmd.none )
+
+                _ ->
+                    ( { model | nextJobs = moreJobs }, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -60,11 +84,11 @@ view model =
     div [ class "app-container" ]
         [ h1 [ class "job-header-text" ] [ text "HN Jobs" ]
         , div [ class "divide" ] []
-        , viewJobs model
+        , viewJobs model.jobs
         , div [ class "btn-container" ] [ button [ onClick LoadMoreJobs, class "load-more-jobs-btn" ] [ text "Load More..." ] ]
         ]
 
 
-viewJobs : Model -> Html Msg
+viewJobs : Array Job -> Html Msg
 viewJobs _ =
     div [ class "jobs-container" ] []
