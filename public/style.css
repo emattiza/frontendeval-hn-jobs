@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  box-sizing: border-box;
+}
+
+.app-container {
+  @apply align-middle
+}
+
+.job-header-text {
+    @apply max-h-16 text-center text-2xl my-4
+}
+
+.divide {
+  @apply divider
+}
+
+.jobs-container {
+    @apply grid grid-cols-1 md:grid-cols-3 grid-flow-row gap-4 my-4
+}
+.btn-container {
+    @apply grid grid-cols-3 md:grid-cols-5 gap-4 justify-center my-4
+}
+.btn-container > button {
+    @apply content-center col-span-1 md:col-start-3 col-start-2
+}
+
+.job-article {
+    @apply col-span-1 card text-center card-bordered rounded-md shadow-lg
+}
+.load-more-jobs-btn {
+    @apply btn btn-ghost text-center place-content-center content-center self-center
+}
+
+.job-body {
+  @apply card-body
+}
+
+.job-details {
+  @apply align-middle
+}
+.job-company {
+  @apply align-top
+}
+.job-date {
+  @apply align-bottom
+}
