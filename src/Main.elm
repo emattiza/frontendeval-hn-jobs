@@ -2,14 +2,16 @@ module Main exposing (main)
 
 import Array exposing (Array)
 import Browser
-import Html exposing (Html, button, div, h1, text)
-import Html.Attributes exposing (class)
+import Html exposing (Html, a, article, button, div, h1, h2, p, text)
+import Html.Attributes exposing (class, href)
 import Html.Events exposing (..)
-import Job exposing (Job)
+import Job exposing (Job, viewJob)
 import JobFeed exposing (JobFeed)
 import Msg exposing (Msg(..), getCurrentJobFeed, getFirstJobs, getMoreJobs)
 import RemoteData exposing (RemoteData(..), WebData)
+import String exposing (padLeft)
 import Task
+import Time exposing (millisToPosix)
 
 
 type alias Model =
@@ -27,7 +29,9 @@ init _ =
       , firstJobs = NotAsked
       , nextJobs = NotAsked
       }
-    , Task.attempt (\result -> LoadFeed (RemoteData.fromResult result)) getCurrentJobFeed
+    , Task.attempt
+        (\result -> LoadFeed (RemoteData.fromResult result))
+        getCurrentJobFeed
     )
 
 
@@ -57,7 +61,14 @@ update msg model =
         LoadFeed feed ->
             case feed of
                 Success newFeed ->
-                    ( { model | jobFeed = feed, firstJobs = Loading }, Task.attempt (\result -> GotFirstJobs <| RemoteData.fromResult result) (getFirstJobs newFeed) )
+                    ( { model
+                        | jobFeed = feed
+                        , firstJobs = Loading
+                      }
+                    , Task.attempt
+                        (\result -> GotFirstJobs <| RemoteData.fromResult result)
+                        (getFirstJobs newFeed)
+                    )
 
                 _ ->
                     ( { model | jobFeed = feed }, Cmd.none )
@@ -65,7 +76,12 @@ update msg model =
         GotFirstJobs newJobs ->
             case newJobs of
                 Success gotJobs ->
-                    ( { model | firstJobs = newJobs, jobs = Array.fromList gotJobs }, Cmd.none )
+                    ( { model
+                        | firstJobs = newJobs
+                        , jobs = Array.fromList gotJobs
+                      }
+                    , Cmd.none
+                    )
 
                 _ ->
                     ( { model | firstJobs = newJobs }, Cmd.none )
@@ -73,7 +89,12 @@ update msg model =
         GotMoreJobs moreJobs ->
             case moreJobs of
                 Success gotJobs ->
-                    ( { model | nextJobs = moreJobs, jobs = Array.append model.jobs (Array.fromList gotJobs) }, Cmd.none )
+                    ( { model
+                        | nextJobs = moreJobs
+                        , jobs = Array.append model.jobs (Array.fromList gotJobs)
+                      }
+                    , Cmd.none
+                    )
 
                 _ ->
                     ( { model | nextJobs = moreJobs }, Cmd.none )
@@ -85,10 +106,17 @@ view model =
         [ h1 [ class "job-header-text" ] [ text "HN Jobs" ]
         , div [ class "divide" ] []
         , viewJobs model.jobs
-        , div [ class "btn-container" ] [ button [ onClick LoadMoreJobs, class "load-more-jobs-btn" ] [ text "Load More..." ] ]
+        , div
+            [ class "btn-container" ]
+            [ button
+                [ onClick LoadMoreJobs, class "load-more-jobs-btn" ]
+                [ text "Load More..." ]
+            ]
         ]
 
 
 viewJobs : Array Job -> Html Msg
-viewJobs _ =
-    div [ class "jobs-container" ] []
+viewJobs jobs =
+    div
+        [ class "jobs-container" ]
+        (Array.toList <| Array.map viewJob jobs)
